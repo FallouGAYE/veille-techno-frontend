@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import {
+  Link,
+  useNavigate,
+} from 'react-router-dom';
 
 import {
   User,
@@ -11,27 +14,63 @@ import {
   ArrowRight,
 } from 'lucide-react';
 
+import {
+  register,
+} from '../services/auth.service';
+
+
 function RegisterForm() {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
-  const [showPassword, setShowPassword] = useState(false);
+  const [firstName, setFirstName] =
+    useState('');
 
-  const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState('');
+  const [lastName, setLastName] =
+    useState('');
 
-  const hasEightCharacters = password.length >= 8;
-  const hasNumber = /\d/.test(password);
+  const [email, setEmail] =
+    useState('');
+
+  const [password, setPassword] =
+    useState('');
+
+  const [showPassword, setShowPassword] =
+    useState(false);
+
+  const [message, setMessage] =
+    useState('');
+
+  const [messageType, setMessageType] =
+    useState('');
+
+  const [loading, setLoading] =
+    useState(false);
+
+
+  /* =========================================
+     PASSWORD VALIDATION
+  ========================================= */
+
+  const hasEightCharacters =
+    password.length >= 8;
+
+  const hasNumber =
+    /\d/.test(password);
+
   const hasSpecialCharacter =
     /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
-  const handleRegister = (event) => {
+
+  /* =========================================
+     REGISTER
+  ========================================= */
+
+  const handleRegister = async (event) => {
     event.preventDefault();
 
     setMessage('');
     setMessageType('');
+
 
     if (
       !firstName.trim() ||
@@ -39,10 +78,15 @@ function RegisterForm() {
       !email.trim() ||
       !password
     ) {
-      setMessage('Please fill in all fields.');
+      setMessage(
+        'Please fill in all fields.'
+      );
+
       setMessageType('error');
+
       return;
     }
+
 
     if (
       !hasEightCharacters ||
@@ -52,36 +96,72 @@ function RegisterForm() {
       setMessage(
         'Please choose a stronger password.'
       );
+
       setMessageType('error');
+
       return;
     }
 
-    /*
-      FRONT-04 :
-      La connexion au backend sera ajoutée ici.
 
-      Le backend attend :
-      {
-        name,
+    setLoading(true);
+
+
+    try {
+      await register(
+        firstName,
+        lastName,
         email,
         password
-      }
+      );
 
-      name sera construit avec :
-      firstName + lastName
-    */
 
-    setMessage(
-      'Form is valid. Backend connection will be added next.'
-    );
+      setMessage(
+        'Account created successfully!'
+      );
 
-    setMessageType('success');
+      setMessageType('success');
+
+
+      setFirstName('');
+      setLastName('');
+      setEmail('');
+      setPassword('');
+
+
+      setTimeout(() => {
+        navigate('/login');
+      }, 1200);
+
+    } catch (error) {
+      console.error(
+        'Register error:',
+        error
+      );
+
+      setMessage(
+        error.message ||
+          'Unable to create your account.'
+      );
+
+      setMessageType('error');
+
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   return (
     <>
+      {/* =====================================
+          SIGN IN
+      ===================================== */}
+
       <div className="register-signin">
-        <span>Already have an account?</span>
+
+        <span>
+          Already have an account?
+        </span>
 
         <Link
           to="/login"
@@ -89,28 +169,54 @@ function RegisterForm() {
         >
           Sign in
         </Link>
+
       </div>
+
+
+      {/* =====================================
+          FORM
+      ===================================== */}
 
       <form
         className="register-form"
         onSubmit={handleRegister}
       >
+
+        {/* =================================
+            TITRE
+        ================================= */}
+
         <div className="register-heading">
-          <h1>Create your account</h1>
+
+          <h1>
+            Create your account
+          </h1>
 
           <p>
             Join TaskBoard and start organizing
             your work today.
           </p>
+
         </div>
 
+
+        {/* =================================
+            FIRST NAME + LAST NAME
+        ================================= */}
+
         <div className="register-name-row">
+
+
+          {/* FIRST NAME */}
+
           <div className="register-form-group">
+
             <label htmlFor="firstName">
               First name
             </label>
 
             <div className="register-input-container">
+
               <User
                 className="register-input-icon"
                 size={18}
@@ -123,20 +229,29 @@ function RegisterForm() {
                 placeholder="John"
                 value={firstName}
                 onChange={(event) =>
-                  setFirstName(event.target.value)
+                  setFirstName(
+                    event.target.value
+                  )
                 }
                 autoComplete="given-name"
                 required
               />
+
             </div>
+
           </div>
 
+
+          {/* LAST NAME */}
+
           <div className="register-form-group">
+
             <label htmlFor="lastName">
               Last name
             </label>
 
             <div className="register-input-container">
+
               <User
                 className="register-input-icon"
                 size={18}
@@ -149,21 +264,33 @@ function RegisterForm() {
                 placeholder="Doe"
                 value={lastName}
                 onChange={(event) =>
-                  setLastName(event.target.value)
+                  setLastName(
+                    event.target.value
+                  )
                 }
                 autoComplete="family-name"
                 required
               />
+
             </div>
+
           </div>
+
         </div>
 
+
+        {/* =================================
+            EMAIL
+        ================================= */}
+
         <div className="register-form-group">
+
           <label htmlFor="register-email">
             Email
           </label>
 
           <div className="register-input-container">
+
             <Mail
               className="register-input-icon"
               size={18}
@@ -176,20 +303,31 @@ function RegisterForm() {
               placeholder="you@example.com"
               value={email}
               onChange={(event) =>
-                setEmail(event.target.value)
+                setEmail(
+                  event.target.value
+                )
               }
               autoComplete="email"
               required
             />
+
           </div>
+
         </div>
 
+
+        {/* =================================
+            PASSWORD
+        ================================= */}
+
         <div className="register-form-group">
+
           <label htmlFor="register-password">
             Password
           </label>
 
           <div className="register-input-container">
+
             <LockKeyhole
               className="register-input-icon"
               size={18}
@@ -206,17 +344,22 @@ function RegisterForm() {
               placeholder="Create a password"
               value={password}
               onChange={(event) =>
-                setPassword(event.target.value)
+                setPassword(
+                  event.target.value
+                )
               }
               autoComplete="new-password"
               required
             />
 
+
             <button
               type="button"
               className="register-password-toggle"
               onClick={() =>
-                setShowPassword((current) => !current)
+                setShowPassword(
+                  (current) => !current
+                )
               }
               aria-label={
                 showPassword
@@ -224,22 +367,37 @@ function RegisterForm() {
                   : 'Show password'
               }
             >
+
               {showPassword ? (
+
                 <EyeOff
                   size={19}
                   strokeWidth={1.8}
                 />
+
               ) : (
+
                 <Eye
                   size={19}
                   strokeWidth={1.8}
                 />
+
               )}
+
             </button>
+
           </div>
+
         </div>
 
+
+        {/* =================================
+            PASSWORD RULES
+        ================================= */}
+
         <div className="password-requirements">
+
+
           <div
             className={
               hasEightCharacters
@@ -247,12 +405,15 @@ function RegisterForm() {
                 : 'requirement'
             }
           >
+
             <span className="requirement-check">
               <Check size={13} />
             </span>
 
             At least 8 characters
+
           </div>
+
 
           <div
             className={
@@ -261,12 +422,15 @@ function RegisterForm() {
                 : 'requirement'
             }
           >
+
             <span className="requirement-check">
               <Check size={13} />
             </span>
 
             Include a number
+
           </div>
+
 
           <div
             className={
@@ -275,68 +439,136 @@ function RegisterForm() {
                 : 'requirement'
             }
           >
+
             <span className="requirement-check">
               <Check size={13} />
             </span>
 
             Include a special character
+
           </div>
+
         </div>
 
+
+        {/* =================================
+            MESSAGE
+        ================================= */}
+
         {message && (
+
           <div
-            className={`register-message ${messageType}`}
+            className={
+              `register-message ${messageType}`
+            }
           >
             {message}
           </div>
+
         )}
+
+
+        {/* =================================
+            CREATE ACCOUNT
+        ================================= */}
 
         <button
           type="submit"
           className="register-button"
+          disabled={loading}
         >
-          Create account
 
-          <ArrowRight
-            size={18}
-            strokeWidth={1.8}
-          />
+          {loading ? (
+
+            <>
+
+              <span
+                className="register-spinner"
+              />
+
+              Creating account...
+
+            </>
+
+          ) : (
+
+            <>
+
+              Create account
+
+              <ArrowRight
+                size={18}
+                strokeWidth={1.8}
+              />
+
+            </>
+
+          )}
+
         </button>
 
+
+        {/* =================================
+            SEPARATOR
+        ================================= */}
+
         <div className="register-separator">
-          <span />
-
-          <p>or sign up with</p>
 
           <span />
+
+          <p>
+            or sign up with
+          </p>
+
+          <span />
+
         </div>
 
+
+        {/* =================================
+            SOCIAL
+        ================================= */}
+
         <div className="register-social-buttons">
+
           <button
             type="button"
             className="register-social"
           >
+
             <span className="register-google-logo">
               G
             </span>
 
             Continue with Google
+
           </button>
+
 
           <button
             type="button"
             className="register-social"
           >
+
             <span className="register-github-logo">
               GH
             </span>
 
             Continue with GitHub
+
           </button>
+
         </div>
 
+
+        {/* =================================
+            TERMS
+        ================================= */}
+
         <p className="register-terms">
-          By creating an account, you agree to our{' '}
+
+          By creating an account,
+          you agree to our{' '}
 
           <a
             href="#"
@@ -357,10 +589,13 @@ function RegisterForm() {
           >
             Privacy Policy
           </a>.
+
         </p>
+
       </form>
     </>
   );
 }
+
 
 export default RegisterForm;
