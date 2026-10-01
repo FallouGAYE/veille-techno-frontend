@@ -1,0 +1,111 @@
+.form-container {
+  width: 100%;
+  max-width: 420px;
+  margin: 70px auto;
+  padding: 30px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.form-container h1 {
+  margin-bottom: 25px;
+  text-align: center;
+  font-size: 26px;
+  color: #1f2937;
+}
+
+.form-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-container label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.form-container input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+  font-size: 15px;
+}
+
+.form-container input:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.form-container button {
+  margin-top: 12px;
+  padding: 12px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 7px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.form-container button:hover {
+  background: #1d4ed8;
+}
+
+.form-container p {
+  margin-top: 15px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.form-container a {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.form-container a:hover {
+  text-decoration: underline;
+}
+
+/* Couleur des champs Login et Register */
+
+.form-container input {
+  background-color: #ffffff;
+  color: #1f2937;
+  -webkit-text-fill-color: #1f2937;
+}
+
+.form-container input::placeholder {
+  color: #9ca3af;
+  -webkit-text-fill-color: #9ca3af;
+}
+
+/* Couleur des messages et des textes */
+
+.form-container label,
+.form-container p {
+  color: #374151;
+}
+
+.form-container h1 {
+  color: #111827;
+}
+
+/* Conserver les couleurs pendant la saisie */
+
+.form-container input:focus {
+  background-color: #ffffff;
+  color: #1f2937;
+  border-color: #2563eb;
+}
+
+/* Corriger le remplissage automatique de Chrome */
+
+.form-container input:-webkit-autofill {
+  -webkit-text-fill-color: #1f2937;
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+}

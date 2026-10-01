@@ -1,0 +1,139 @@
+.board-page {
+  min-height: 100vh;
+  padding: 40px;
+  background-color: #f4f6f8;
+  color: #1e293b;
+}
+
+.board-page h1 {
+  margin-bottom: 25px;
+  font-size: 30px;
+  color: #1e293b;
+}
+
+/* Formulaire pour ajouter une colonne */
+.add-list-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.add-list-form input {
+  width: 250px;
+  padding: 12px;
+  background-color: white;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+.add-list-form input::placeholder {
+  color: #94a3b8;
+}
+
+.add-list-form button {
+  padding: 12px 20px;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.add-list-form button:hover {
+  background-color: #1d4ed8;
+}
+
+/* Tableau Kanban */
+.kanban-board {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+/* Une colonne */
+.kanban-column {
+  width: 300px;
+  min-height: 200px;
+  padding: 20px;
+  background-color: #e2e8f0;
+  border-radius: 10px;
+}
+
+.kanban-column h2 {
+  margin: 0 0 20px;
+  font-size: 20px;
+  color: #1e293b;
+}
+
+/* Une tâche */
+.kanban-card {
+  margin-bottom: 10px;
+  padding: 15px;
+  background-color: white;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+}
+
+/* Téléphone */
+@media (max-width: 768px) {
+  .board-page {
+    padding: 20px;
+  }
+
+  .kanban-board {
+    flex-direction: column;
+  }
+
+  .kanban-column {
+    width: 100%;
+  }
+}
+
+.add-task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.add-task-form input,
+.add-task-form textarea {
+  width: 100%;
+  padding: 10px;
+  background-color: white;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+}
+
+.add-task-form textarea {
+  min-height: 70px;
+  resize: vertical;
+}
+
+.add-task-form button {
+  padding: 10px;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.add-task-form button:hover {
+  background-color: #1d4ed8;
+}
+
+.kanban-card strong {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.kanban-card p {
+  margin: 0;
+  font-size: 14px;
+}
