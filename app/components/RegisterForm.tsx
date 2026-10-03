@@ -4,6 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
+import { register } from '../services/auth.service';
+
 export default function RegisterForm() {
   const router = useRouter();
 
@@ -13,31 +15,22 @@ export default function RegisterForm() {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: React.FormEvent<HTMLFormElement>,
+  ) {
     event.preventDefault();
     setMessage('');
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: `${firstName.trim()} ${lastName.trim()}`,
-          email: email.trim(),
-          password,
-        }),
+      await register({
+        name: `${firstName.trim()} ${lastName.trim()}`,
+        email: email.trim(),
+        password,
       });
-
-      if (!response.ok) {
-        setMessage("L'inscription a échoué.");
-        return;
-      }
 
       router.push('/login');
     } catch {
-      setMessage('Impossible de contacter le serveur.');
+      setMessage("L'inscription a échoué.");
     }
   }
 
@@ -50,7 +43,9 @@ export default function RegisterForm() {
         id="lastName"
         type="text"
         value={lastName}
-        onChange={(event) => setLastName(event.target.value)}
+        onChange={(event) =>
+          setLastName(event.target.value)
+        }
         required
       />
 
@@ -59,7 +54,9 @@ export default function RegisterForm() {
         id="firstName"
         type="text"
         value={firstName}
-        onChange={(event) => setFirstName(event.target.value)}
+        onChange={(event) =>
+          setFirstName(event.target.value)
+        }
         required
       />
 
@@ -68,26 +65,39 @@ export default function RegisterForm() {
         id="email"
         type="email"
         value={email}
-        onChange={(event) => setEmail(event.target.value)}
+        onChange={(event) =>
+          setEmail(event.target.value)
+        }
         required
       />
 
-      <label htmlFor="password">Mot de passe</label>
+      <label htmlFor="password">
+        Mot de passe
+      </label>
       <input
         id="password"
         type="password"
         value={password}
-        onChange={(event) => setPassword(event.target.value)}
+        onChange={(event) =>
+          setPassword(event.target.value)
+        }
         minLength={8}
         required
       />
 
-      {message && <p role="alert">{message}</p>}
+      {message && (
+        <p role="alert">{message}</p>
+      )}
 
-      <button type="submit">S'inscrire</button>
+      <button type="submit">
+        S'inscrire
+      </button>
 
       <p>
-        Déjà inscrit ? <Link href="/login">Se connecter</Link>
+        Déjà inscrit ?{' '}
+        <Link href="/login">
+          Se connecter
+        </Link>
       </p>
     </form>
   );

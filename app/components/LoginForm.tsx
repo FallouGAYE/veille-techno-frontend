@@ -4,6 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
+import { login } from '../services/auth.service';
+
 export default function LoginForm() {
   const router = useRouter();
 
@@ -11,39 +13,26 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: React.FormEvent<HTMLFormElement>,
+  ) {
     event.preventDefault();
     setMessage('');
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-          password,
-        }),
+      const data = await login({
+        email: email.trim(),
+        password,
       });
 
-      if (!response.ok) {
-        setMessage('Email ou mot de passe incorrect.');
-        return;
-      }
-
-      const data = await response.json();
-
-      if (!data.accessToken) {
-        setMessage('Le serveur ne renvoie pas de jeton de connexion.');
-        return;
-      }
-
-      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem(
+        'accessToken',
+        data.accessToken,
+      );
 
       router.push('/board');
     } catch {
-      setMessage('Impossible de contacter le serveur.');
+      setMessage('Email ou mot de passe incorrect.');
     }
   }
 
@@ -69,12 +58,19 @@ export default function LoginForm() {
         required
       />
 
-      {message && <p role="alert">{message}</p>}
+      {message && (
+        <p role="alert">{message}</p>
+      )}
 
-      <button type="submit">Se connecter</button>
+      <button type="submit">
+        Se connecter
+      </button>
 
       <p>
-        Pas encore inscrit ? <Link href="/register">Créer un compte</Link>
+        Pas encore inscrit ?{' '}
+        <Link href="/register">
+          Créer un compte
+        </Link>
       </p>
     </form>
   );

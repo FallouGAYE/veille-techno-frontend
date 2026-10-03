@@ -1,106 +1,84 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import KanbanColumn from '../components/KanbanColumn';
-import './board.css';
 
-type List = {
-  id: number;
-  title: string;
-};
+import KanbanColumn from '../components/KanbanColumn';
+
+import {
+  createList,
+  getLists,
+  List,
+} from '../services/lists.service';
+
+import './board.css';
 
 export default function BoardPage() {
   const [lists, setLists] = useState<List[]>([]);
   const [newListTitle, setNewListTitle] = useState('');
   const [message, setMessage] = useState('');
 
-  // Récupérer les colonnes au chargement de la page
+  // Permet de demander aux colonnes
+  // de recharger leurs tâches.
+  const [refreshKey, setRefreshKey] = useState(0);
+
   useEffect(() => {
-    async function getLists() {
-      const token = localStorage.getItem('accessToken');
-
-      if (!token) {
-        setMessage('Vous devez être connecté.');
-        return;
-      }
-
+    async function loadLists() {
       try {
-        const response = await fetch('http://localhost:3000/api/lists', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          setMessage('Impossible de récupérer les colonnes.');
-          return;
-        }
-
-        const data = await response.json();
-
+        const data = await getLists();
         setLists(data);
       } catch {
-        setMessage('Impossible de contacter le serveur.');
+        setMessage('Impossible de récupérer les colonnes.');
       }
     }
 
-    getLists();
+    loadLists();
   }, []);
 
-  // Ajouter une nouvelle colonne
-  async function addList(event: React.FormEvent<HTMLFormElement>) {
+  async function handleAddList(
+    event: React.FormEvent<HTMLFormElement>,
+  ) {
     event.preventDefault();
 
     if (!newListTitle.trim()) {
       return;
     }
 
-    const token = localStorage.getItem('accessToken');
-
-    if (!token) {
-      setMessage('Vous devez être connecté.');
-      return;
-    }
-
     try {
-      const response = await fetch('http://localhost:3000/api/lists', {
-        method: 'POST',
+      const newList = await createList(
+        newListTitle.trim(),
+      );
 
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+      setLists((currentLists) => [
+        ...currentLists,
+        newList,
+      ]);
 
-        body: JSON.stringify({
-          title: newListTitle.trim(),
-        }),
-      });
-
-      if (!response.ok) {
-        setMessage("Impossible d'ajouter la colonne.");
-        return;
-      }
-
-      const newList = await response.json();
-
-      setLists([...lists, newList]);
       setNewListTitle('');
       setMessage('');
     } catch {
-      setMessage('Impossible de contacter le serveur.');
+      setMessage("Impossible d'ajouter la colonne.");
     }
+  }
+
+  function handleTaskMoved() {
+    setRefreshKey((current) => current + 1);
   }
 
   return (
     <main className="board-page">
       <h1>Mon tableau Kanban</h1>
 
-      <form onSubmit={addList} className="add-list-form">
+      <form
+        onSubmit={handleAddList}
+        className="add-list-form"
+      >
         <input
           type="text"
           placeholder="Nom de la colonne"
           value={newListTitle}
-          onChange={(event) => setNewListTitle(event.target.value)}
+          onChange={(event) =>
+            setNewListTitle(event.target.value)
+          }
         />
 
         <button type="submit">
@@ -112,12 +90,14 @@ export default function BoardPage() {
 
       <div className="kanban-board">
         {lists.map((list) => (
-         <KanbanColumn
+          <KanbanColumn
             key={list.id}
             id={list.id}
             title={list.title}
-            tasks={[]}
-            />
+            lists={lists}
+            refreshKey={refreshKey}
+            onTaskMoved={handleTaskMoved}
+          />
         ))}
       </div>
     </main>

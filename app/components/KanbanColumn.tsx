@@ -2,107 +2,93 @@
 
 import { useEffect, useState } from 'react';
 
-type Task = {
-  id: number;
-  title: string;
-  description?: string;
-};
+import TaskCard from './TaskCard';
+
+import {
+  Card,
+  createCard,
+  getCards,
+} from '../services/cards.service';
+
+import { List } from '../services/lists.service';
 
 type KanbanColumnProps = {
   id: number;
   title: string;
+  lists: List[];
+  refreshKey: number;
+  onTaskMoved: () => void;
 };
 
 export default function KanbanColumn({
   id,
   title,
+  lists,
+  refreshKey,
+  onTaskMoved,
 }: KanbanColumnProps) {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<Card[]>([]);
   const [taskTitle, setTaskTitle] = useState('');
   const [description, setDescription] = useState('');
   const [message, setMessage] = useState('');
 
-  // Récupérer les tâches de cette colonne
   useEffect(() => {
-    async function getTasks() {
-      const token = localStorage.getItem('accessToken');
-
-      if (!token) {
-        return;
-      }
-
+    async function loadCards() {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/lists/${id}/cards`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-
-        if (!response.ok) {
-          setMessage('Impossible de récupérer les tâches.');
-          return;
-        }
-
-        const data = await response.json();
-
+        const data = await getCards(id);
         setTasks(data);
       } catch {
-        setMessage('Impossible de contacter le serveur.');
+        setMessage('Impossible de récupérer les tâches.');
       }
     }
 
-    getTasks();
-  }, [id]);
+    loadCards();
+  }, [id, refreshKey]);
 
-  // Ajouter une tâche
-  async function addTask(event: React.FormEvent<HTMLFormElement>) {
+  async function handleAddTask(
+    event: React.FormEvent<HTMLFormElement>,
+  ) {
     event.preventDefault();
 
     if (!taskTitle.trim()) {
       return;
     }
 
-    const token = localStorage.getItem('accessToken');
-
-    if (!token) {
-      setMessage('Vous devez être connecté.');
-      return;
-    }
-
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/lists/${id}/cards`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            title: taskTitle.trim(),
-            description: description.trim(),
-          }),
-        },
-      );
+      const newTask = await createCard(id, {
+        title: taskTitle.trim(),
+        description: description.trim(),
+      });
 
-      if (!response.ok) {
-        setMessage("Impossible d'ajouter la tâche.");
-        return;
-      }
-
-      const newTask = await response.json();
-
-      setTasks([...tasks, newTask]);
+      setTasks((currentTasks) => [
+        ...currentTasks,
+        newTask,
+      ]);
 
       setTaskTitle('');
       setDescription('');
       setMessage('');
     } catch {
-      setMessage('Impossible de contacter le serveur.');
+      setMessage("Impossible d'ajouter la tâche.");
     }
+  }
+
+  function handleTaskUpdated(updatedTask: Card) {
+    setTasks((currentTasks) =>
+      currentTasks.map((task) =>
+        task.id === updatedTask.id
+          ? updatedTask
+          : task,
+      ),
+    );
+  }
+
+  function handleTaskDeleted(taskId: number) {
+    setTasks((currentTasks) =>
+      currentTasks.filter(
+        (task) => task.id !== taskId,
+      ),
+    );
   }
 
   return (
@@ -110,28 +96,37 @@ export default function KanbanColumn({
       <h2>{title}</h2>
 
       {tasks.map((task) => (
-        <div className="kanban-card" key={task.id}>
-          <strong>{task.title}</strong>
-
-          {task.description && (
-            <p>{task.description}</p>
-          )}
-        </div>
+        <TaskCard
+          key={task.id}
+          task={task}
+          lists={lists}
+          currentListId={id}
+          onTaskUpdated={handleTaskUpdated}
+          onTaskDeleted={handleTaskDeleted}
+          onTaskMoved={onTaskMoved}
+        />
       ))}
 
-      <form onSubmit={addTask} className="add-task-form">
+      <form
+        onSubmit={handleAddTask}
+        className="add-task-form"
+      >
         <input
           type="text"
           placeholder="Titre de la tâche"
           value={taskTitle}
-          onChange={(event) => setTaskTitle(event.target.value)}
+          onChange={(event) =>
+            setTaskTitle(event.target.value)
+          }
           required
         />
 
         <textarea
           placeholder="Description"
           value={description}
-          onChange={(event) => setDescription(event.target.value)}
+          onChange={(event) =>
+            setDescription(event.target.value)
+          }
         />
 
         <button type="submit">
